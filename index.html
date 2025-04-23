@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Colorist</title>
+        <style>
+            .container {
+                display: flex;
+                justify-content: center; /* Center horizontally */
+                align-items: center; /* Center vertically */
+                min-height: 100vh; /* Make the container take up at least the full viewport height */
+                background-color: #f0f0f0; /* Optional background color for the page */
+            }
+            .grid {
+                display: grid; /* Use CSS Grid for layout */
+                grid-template-columns: 220px 220px; /* Create two columns */
+                width: 440px; /* Adjust width to accommodate two divs with margin */
+                height: 420px; /* Adjust height to accommodate two divs with margin */
+                justify-content: center; /* Center the grid horizontally within the container */
+                align-items: center; /* Center the grid vertically within the container */
+            }
+            .red-div {
+                width: 200px;
+                height: 200px;
+                margin: 10px;
+            }
+            .red-like-div {
+                width: 200px;
+                height: 200px;
+                margin: 10px;
+            }
+        </style>
+        <script>
+            function componentToHex(c) {
+                const hex = c.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }
+
+            function slightlyModifyHexColor(hexColor) {
+                let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+                hexColor = hexColor.replace(shorthandRegex, function(m, r, g, b) {return r + r + g + g + b + b;});
+                let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexColor);
+
+                const r = parseInt(result[1], 16);
+                const g = parseInt(result[2], 16);
+                const b = parseInt(result[3], 16);
+
+                const modificationFactor = 10; // Adjust for more/less drastic changes
+                const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * (2 * modificationFactor + 1)) - modificationFactor));
+                const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * (2 * modificationFactor + 1)) - modificationFactor));
+                const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * (2 * modificationFactor + 1)) - modificationFactor));
+
+                return "#" + componentToHex(newR) + componentToHex(newG) + componentToHex(newB)
+            }
+
+            function generateRandomHexColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 3; i++) {
+                    color += componentToHex(Math.ceil(Math.random() * (200 - 0) + 0));
+                }
+                return color;
+            }
+            function randomize() {
+                const grid = document.getElementById('redDivGrid');
+                const divs = Array.from(grid.children); // Get the div elements as an array
+                for (i = divs.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [divs[i], divs[j]] = [divs[j], divs[i]]; // Swap elements
+                }
+                grid.innerHTML = '';
+                divs.forEach(div => grid.appendChild(div));
+
+                color = generateRandomHexColor()
+                const elements = document.getElementsByClassName("red-div");
+                const unique = document.getElementsByClassName("red-like-div");
+                for (let i = 0; i < elements.length; i++) {
+                    elements[i].style.backgroundColor = color;
+                }
+                for (let i = 0; i < unique.length; i++) {
+                    unique[i].style.backgroundColor = slightlyModifyHexColor(color);
+                }
+            }
+        </script>
+    </head>
+    <body onload="randomize()">
+        <div class="container">
+            <div class="grid" id="redDivGrid">
+                <div class="red-div"></div>
+                <div class="red-div"></div>
+                <div class="red-like-div" onclick="alert('acertou!'); randomize();"></div>
+                <div class="red-div"></div>
+            </div>
+        </div>
+    </body>
+</html>
