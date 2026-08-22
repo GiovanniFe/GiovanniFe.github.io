@@ -3,22 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="seu-icone.svg" type="image/svg+xml">
     <title>Colorist</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
+    <div id="screen-menu" class="screen">
+        <h1>Colorist</h1>
+        <div class="menu-buttons">
+            <button onclick="startGame('survival')">Survival</button>
+            <button onclick="startGame('progressivo')">Progressivo</button>
+            <button onclick="startGame('pegadinha')">Pegadinha</button>
+            <div class="zen-group">
+                <span>Modo Zen:</span>
+                <button onclick="startGame('zen', 40)">Fácil</button>
+                <button onclick="startGame('zen', 20)">Médio</button>
+                <button onclick="startGame('zen', 5)">Difícil</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen hidden">
+        <div class="hud">
+            <div id="hud-left"></div>
+            <div id="hud-center"></div>
+            <div id="hud-right"></div>
+        </div>
+
         <div class="grid" id="grid">
             <div class="square-div"></div>
             <div class="square-div"></div>
             <div class="square-div"></div>
             <div class="square-div"></div>
         </div>
+
+        <button id="btn-trick" class="hidden" onclick="handleTrickButtonClick()">Pegadinha!</button>
+        <button class="btn-quit" onclick="showMenu()">Sair</button>
     </div>
 
-    <input type="hidden" id="difficulty" value="50">
-    <input type="hidden" id="score" value="-1">
+    <div id="screen-gameover" class="screen hidden">
+        <h2>Fim de Jogo</h2>
+        <p id="gameover-stats"></p>
+        <button onclick="showMenu()">Voltar ao Menu</button>
+    </div>
 
     <script src="js/game.js"></script>
 </body>
