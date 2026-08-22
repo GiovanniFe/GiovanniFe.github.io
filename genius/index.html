@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genius</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="screen-menu" class="screen">
+        <h1>Genius</h1>
+        <div class="menu-buttons">
+            <button class="btn-progressivo" id="btn-classic">
+                🎮 Clássico <span id="menu-rec-classic" class="menu-rec"></span>
+            </button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen hidden">
+        <div class="hud">
+            <div id="hud-center">
+                <span id="level-text">Nível: 1</span>
+            </div>
+        </div>
+
+        <div class="grid" id="grid">
+            <div class="genius-btn" id="btn-green" data-color="0"></div>
+            <div class="genius-btn" id="btn-red" data-color="1"></div>
+            <div class="genius-btn" id="btn-yellow" data-color="2"></div>
+            <div class="genius-btn" id="btn-blue" data-color="3"></div>
+        </div>
+
+        <button class="btn-quit" id="btn-quit">✖ Abandonar Partida</button>
+    </div>
+
+    <div id="screen-gameover" class="screen hidden">
+        <h2>Fim de Jogo</h2>
+        <p id="gameover-stats"></p>
+        <button class="btn-progressivo" id="btn-back-menu">Voltar ao Menu</button>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
