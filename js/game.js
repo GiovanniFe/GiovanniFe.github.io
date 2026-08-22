@@ -311,3 +311,4 @@ function endGame() {
 }
 
 updateMenuRecords();
+randomizeTitle();
