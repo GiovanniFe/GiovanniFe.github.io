@@ -8,16 +8,23 @@
 </head>
 <body>
     <div id="screen-menu" class="screen">
-        <h1>Colorist</h1>
+        <h1>C<span class="odd-letter">o</span>lorist</h1>
         <div class="menu-buttons">
-            <button onclick="startGame('survival')">Survival</button>
-            <button onclick="startGame('progressivo')">Progressivo</button>
-            <button onclick="startGame('pegadinha')">Pegadinha</button>
+            <button class="btn-survival" onclick="startGame('survival')">
+                💀 Survival <span id="menu-rec-survival" class="menu-rec"></span>
+            </button>
+            <button class="btn-progressivo" onclick="startGame('progressivo')">
+                ↗️ Progressivo <span id="menu-rec-progressivo" class="menu-rec"></span>
+            </button>
+            <button class="btn-pegadinha" onclick="startGame('pegadinha')">
+                😆 Pegadinha <span id="menu-rec-pegadinha" class="menu-rec"></span>
+            </button>
+
             <div class="zen-group">
                 <span>Modo Zen:</span>
-                <button onclick="startGame('zen', 40)">Fácil</button>
-                <button onclick="startGame('zen', 20)">Médio</button>
-                <button onclick="startGame('zen', 5)">Difícil</button>
+                <button class="btn-easy" onclick="startGame('zen', 40)">🍃 Fácil</button>
+                <button class="btn-medium" onclick="startGame('zen', 20)">😊 Médio</button>
+                <button class="btn-hard" onclick="startGame('zen', 5)">😅 Difícil</button>
             </div>
         </div>
     </div>
@@ -43,7 +50,7 @@
     <div id="screen-gameover" class="screen hidden">
         <h2>Fim de Jogo</h2>
         <p id="gameover-stats"></p>
-        <button onclick="showMenu()">Voltar ao Menu</button>
+        <button class="btn-progressivo" onclick="showMenu()">Voltar ao Menu</button>
     </div>
 
     <script src="js/game.js"></script>

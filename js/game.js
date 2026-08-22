@@ -58,10 +58,18 @@ function slightlyModifyHexColor(hexColor, factor) {
 function switchScreen(screenName) {
     Object.values(screens).forEach(s => s.classList.add('hidden'));
     screens[screenName].classList.remove('hidden');
+    document.body.classList.toggle('in-game', screenName === 'game');
+}
+
+function updateMenuRecords() {
+    document.getElementById('menu-rec-survival').innerText = `🏆 ${records.survival}`;
+    document.getElementById('menu-rec-progressivo').innerText = `🏆 ${records.progressivo}`;
+    document.getElementById('menu-rec-pegadinha').innerText = `🏆 ${records.pegadinha}`;
 }
 
 function showMenu() {
     clearInterval(state.timerInterval);
+    updateMenuRecords();
     switchScreen('menu');
 }
 
@@ -76,11 +84,11 @@ function updateHUD() {
     if (state.mode === 'survival') {
         hud.left.innerText = `Pts: ${state.score}`;
         hud.center.innerText = `${state.time}s`;
-        hud.right.innerText = `Rec: ${records.survival}`;
+        hud.right.innerText = `🏆 ${records.survival}`;
     } else {
         hud.left.innerText = `Lvl: ${state.level}`;
         hud.center.innerText = '';
-        hud.right.innerText = `Rec: ${records[state.mode]}`;
+        hud.right.innerText = `🏆 ${records[state.mode]}`;
     }
 }
 
@@ -143,10 +151,8 @@ function handleSquareClick(isCorrect) {
 
     if (isCorrect) {
         advanceProgress();
-    } else if (state.mode !== 'zen') {
-        endGame();
     } else {
-        startRound();
+        endGame();
     }
 }
 
@@ -167,6 +173,8 @@ function advanceProgress() {
     } else if (state.mode === 'progressivo' || state.mode === 'pegadinha') {
         state.level++;
         state.difficulty = Math.max(3, state.difficulty - 2);
+    } else if (state.mode === 'zen') {
+        state.level++;
     }
 
     startRound();
@@ -175,12 +183,14 @@ function advanceProgress() {
 function endGame() {
     clearInterval(state.timerInterval);
 
-    let currentRecord = records[state.mode];
-    let newValue = state.mode === 'survival' ? state.score : state.level;
+    if (state.mode !== 'zen') {
+        let currentRecord = records[state.mode];
+        let newValue = state.mode === 'survival' ? state.score : state.level;
 
-    if (newValue > currentRecord) {
-        records[state.mode] = newValue;
-        localStorage.setItem('coloristRecords', JSON.stringify(records));
+        if (newValue > currentRecord) {
+            records[state.mode] = newValue;
+            localStorage.setItem('coloristRecords', JSON.stringify(records));
+        }
     }
 
     const statsElement = document.getElementById('gameover-stats');
@@ -189,8 +199,10 @@ function endGame() {
     } else if (state.mode !== 'zen') {
         statsElement.innerText = `Nível alcançado: ${state.level}`;
     } else {
-        statsElement.innerText = 'Espero que tenha relaxado!';
+        statsElement.innerText = `Você acertou ${state.level - 1} vezes antes de errar!`;
     }
 
     switchScreen('gameover');
 }
+
+updateMenuRecords();
