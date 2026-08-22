@@ -8,7 +8,7 @@
 </head>
 <body>
     <div id="screen-menu" class="screen">
-        <h1>C<span class="odd-letter">o</span>lorist</h1>
+        <h1 id="game-title"></h1>
         <div class="menu-buttons">
             <button class="btn-tutorial" onclick="startGame('tutorial')">
                 🎓 Como Jogar
@@ -60,12 +60,16 @@
     </div>
 
     <div id="modal-overlay" class="modal-overlay hidden">
-        <div class="modal-box">
-            <h2 id="modal-title">Modo</h2>
-            <p id="modal-text">Instruções...</p>
-            <button class="btn-progressivo" onclick="closeModalAndInit()">Entendi! Começar</button>
+            <div class="modal-box">
+                <h2 id="modal-title">Modo</h2>
+                <p id="modal-text"></p>
+                <div class="dont-show-container">
+                    <input type="checkbox" id="chk-dont-show">
+                    <label for="chk-dont-show">Não mostrar novamente</label>
+                </div>
+                <button class="btn-modal" onclick="closeModalAndInit()">Entendi! Começar</button>
+            </div>
         </div>
-    </div>
 
     <script src="js/game.js"></script>
 </body>

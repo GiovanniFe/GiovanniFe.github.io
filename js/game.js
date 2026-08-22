@@ -80,9 +80,29 @@ function updateMenuRecords() {
     document.getElementById('menu-rec-pegadinha').innerText = `🏆 ${records.pegadinha}`;
 }
 
+function randomizeTitle() {
+    const titleElement = document.getElementById('game-title');
+    if (!titleElement) return;
+
+    const text = "Colorist";
+    const baseColor = generateRandomHexColor();
+    const modifiedColor = slightlyModifyHexColor(baseColor, 60);
+    const impostorIndex = Math.floor(Math.random() * text.length);
+
+    titleElement.innerHTML = '';
+
+    for (let i = 0; i < text.length; i++) {
+        const span = document.createElement('span');
+        span.innerText = text[i];
+        span.style.color = (i === impostorIndex) ? modifiedColor : baseColor;
+        titleElement.appendChild(span);
+    }
+}
+
 function showMenu() {
     clearInterval(state.timerInterval);
     updateMenuRecords();
+    randomizeTitle();
     switchScreen('menu');
 }
 
@@ -95,15 +115,22 @@ function startGame(mode, zenDifficulty = null) {
     if (!seenTutorials[tutKey]) {
         document.getElementById('modal-title').innerText = instructions[tutKey].title;
         document.getElementById('modal-text').innerText = instructions[tutKey].text;
+        document.getElementById('chk-dont-show').checked = false;
         modalOverlay.classList.remove('hidden');
-        seenTutorials[tutKey] = true;
-        localStorage.setItem('coloristTutorials', JSON.stringify(seenTutorials));
     } else {
         initGameParams();
     }
 }
 
 function closeModalAndInit() {
+    let tutKey = state.mode === 'zen' ? 'zen' : state.mode;
+    const dontShow = document.getElementById('chk-dont-show').checked;
+
+    if (dontShow) {
+        seenTutorials[tutKey] = true;
+        localStorage.setItem('coloristTutorials', JSON.stringify(seenTutorials));
+    }
+
     modalOverlay.classList.add('hidden');
     initGameParams();
 }
@@ -146,9 +173,14 @@ function initGameParams() {
     startRound();
 }
 
-function showTimeAnimation(text) {
+function showTimeAnimation(text, isNegative = false) {
     timeAnim.innerText = text;
-    timeAnim.classList.remove('show');
+    timeAnim.classList.remove('show', 'negative');
+
+    if (isNegative) {
+        timeAnim.classList.add('negative');
+    }
+
     void timeAnim.offsetWidth;
     timeAnim.classList.add('show');
 }
@@ -201,7 +233,17 @@ function handleSquareClick(isCorrect) {
     if (isCorrect) {
         advanceProgress();
     } else {
-        endGame();
+        if (state.mode === 'survival') {
+            state.time -= 3;
+            showTimeAnimation('-3s', true);
+            updateHUD();
+
+            if (state.time <= 0) {
+                endGame();
+            }
+        } else {
+            endGame();
+        }
     }
 }
 
