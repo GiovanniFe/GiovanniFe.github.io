@@ -10,6 +10,9 @@
     <div id="screen-menu" class="screen">
         <h1>C<span class="odd-letter">o</span>lorist</h1>
         <div class="menu-buttons">
+            <button class="btn-tutorial" onclick="startGame('tutorial')">
+                🎓 Como Jogar
+            </button>
             <button class="btn-survival" onclick="startGame('survival')">
                 💀 Survival <span id="menu-rec-survival" class="menu-rec"></span>
             </button>
@@ -32,7 +35,10 @@
     <div id="screen-game" class="screen hidden">
         <div class="hud">
             <div id="hud-left"></div>
-            <div id="hud-center"></div>
+            <div id="hud-center" class="timer-container">
+                <span id="timer-text"></span>
+                <span id="time-anim" class="time-anim"></span>
+            </div>
             <div id="hud-right"></div>
         </div>
 
@@ -44,13 +50,21 @@
         </div>
 
         <button id="btn-trick" class="hidden" onclick="handleTrickButtonClick()">Pegadinha!</button>
-        <button class="btn-quit" onclick="showMenu()">Sair</button>
+        <button class="btn-quit" onclick="showMenu()">✖ Abandonar Partida</button>
     </div>
 
     <div id="screen-gameover" class="screen hidden">
         <h2>Fim de Jogo</h2>
         <p id="gameover-stats"></p>
         <button class="btn-progressivo" onclick="showMenu()">Voltar ao Menu</button>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 id="modal-title">Modo</h2>
+            <p id="modal-text">Instruções...</p>
+            <button class="btn-progressivo" onclick="closeModalAndInit()">Entendi! Começar</button>
+        </div>
     </div>
 
     <script src="js/game.js"></script>

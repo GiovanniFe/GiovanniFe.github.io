@@ -6,13 +6,15 @@ const screens = {
 
 const hud = {
     left: document.getElementById('hud-left'),
-    center: document.getElementById('hud-center'),
+    center: document.getElementById('timer-text'),
     right: document.getElementById('hud-right')
 };
 
 const grid = document.getElementById('grid');
 const squares = document.querySelectorAll('.square-div');
 const btnTrick = document.getElementById('btn-trick');
+const timeAnim = document.getElementById('time-anim');
+const modalOverlay = document.getElementById('modal-overlay');
 
 let state = {
     mode: '',
@@ -21,13 +23,24 @@ let state = {
     difficulty: 50,
     time: 0,
     isTrickRound: false,
-    timerInterval: null
+    timerInterval: null,
+    zenDifficulty: null
 };
 
 let records = JSON.parse(localStorage.getItem('coloristRecords')) || {
     survival: 0,
     progressivo: 0,
     pegadinha: 0
+};
+
+let seenTutorials = JSON.parse(localStorage.getItem('coloristTutorials')) || {};
+
+const instructions = {
+    tutorial: { title: "Tutorial", text: "Encontre o quadrado com a cor ligeiramente diferente dos outros e toque nele. Vamos testar!" },
+    survival: { title: "Survival", text: "Você joga contra o tempo. Acerte para ganhar tempo extra! Conforme sua pontuação sobe, a dificuldade aumenta e você precisará de mais acertos seguidos para ganhar os mesmos segundos." },
+    progressivo: { title: "Progressivo", text: "Começa muito fácil, mas a diferença de cores diminui a cada rodada. Até onde você consegue chegar sem errar?" },
+    pegadinha: { title: "Pegadinha", text: "Cuidado! Às vezes todos os quadrados serão exatamente iguais. Quando isso acontecer, clique no botão 'Pegadinha!' embaixo do quadro para não perder." },
+    zen: { title: "Modo Zen", text: "Sem tempo, sem recordes e a dificuldade não muda. Apenas relaxe e clique nas cores." }
 };
 
 function componentToHex(c) {
@@ -73,10 +86,77 @@ function showMenu() {
     switchScreen('menu');
 }
 
+function startGame(mode, zenDifficulty = null) {
+    state.mode = mode;
+    state.zenDifficulty = zenDifficulty;
+
+    let tutKey = mode === 'zen' ? 'zen' : mode;
+
+    if (!seenTutorials[tutKey]) {
+        document.getElementById('modal-title').innerText = instructions[tutKey].title;
+        document.getElementById('modal-text').innerText = instructions[tutKey].text;
+        modalOverlay.classList.remove('hidden');
+        seenTutorials[tutKey] = true;
+        localStorage.setItem('coloristTutorials', JSON.stringify(seenTutorials));
+    } else {
+        initGameParams();
+    }
+}
+
+function closeModalAndInit() {
+    modalOverlay.classList.add('hidden');
+    initGameParams();
+}
+
+function initGameParams() {
+    state.score = 0;
+    state.level = 1;
+    state.isTrickRound = false;
+    clearInterval(state.timerInterval);
+
+    if (state.mode === 'tutorial') {
+        state.difficulty = 80;
+        state.time = 0;
+    } else if (state.mode === 'survival') {
+        state.difficulty = 50;
+        state.time = 15;
+    } else if (state.mode === 'zen') {
+        state.difficulty = state.zenDifficulty;
+        state.time = 0;
+    } else {
+        state.difficulty = 60;
+        state.time = 0;
+    }
+
+    if (state.mode === 'pegadinha') {
+        btnTrick.classList.remove('hidden');
+    } else {
+        btnTrick.classList.add('hidden');
+    }
+
+    if (state.mode === 'survival') {
+        state.timerInterval = setInterval(() => {
+            state.time--;
+            updateHUD();
+            if (state.time <= 0) endGame();
+        }, 1000);
+    }
+
+    switchScreen('game');
+    startRound();
+}
+
+function showTimeAnimation(text) {
+    timeAnim.innerText = text;
+    timeAnim.classList.remove('show');
+    void timeAnim.offsetWidth;
+    timeAnim.classList.add('show');
+}
+
 function updateHUD() {
-    if (state.mode === 'zen') {
+    if (state.mode === 'zen' || state.mode === 'tutorial') {
         hud.left.innerText = '';
-        hud.center.innerText = 'Zen';
+        hud.center.innerText = state.mode === 'tutorial' ? `Fase ${state.level}/3` : 'Zen';
         hud.right.innerText = '';
         return;
     }
@@ -92,35 +172,6 @@ function updateHUD() {
     }
 }
 
-function startGame(mode, zenDifficulty = null) {
-    state = {
-        mode: mode,
-        score: 0,
-        level: 1,
-        difficulty: zenDifficulty || 60,
-        time: mode === 'survival' ? 15 : 0,
-        isTrickRound: false,
-        timerInterval: null
-    };
-
-    if (mode === 'pegadinha') {
-        btnTrick.classList.remove('hidden');
-    } else {
-        btnTrick.classList.add('hidden');
-    }
-
-    if (mode === 'survival') {
-        state.timerInterval = setInterval(() => {
-            state.time--;
-            updateHUD();
-            if (state.time <= 0) endGame();
-        }, 1000);
-    }
-
-    switchScreen('game');
-    startRound();
-}
-
 function startRound() {
     const baseColor = generateRandomHexColor();
     let modifiedColor = slightlyModifyHexColor(baseColor, state.difficulty);
@@ -128,11 +179,9 @@ function startRound() {
 
     state.isTrickRound = false;
 
-    if (state.mode === 'pegadinha') {
-        if (Math.random() < 0.15) {
-            state.isTrickRound = true;
-            modifiedColor = baseColor;
-        }
+    if (state.mode === 'pegadinha' && Math.random() < 0.15) {
+        state.isTrickRound = true;
+        modifiedColor = baseColor;
     }
 
     squares.forEach((square, index) => {
@@ -167,9 +216,21 @@ function handleTrickButtonClick() {
 }
 
 function advanceProgress() {
-    if (state.mode === 'survival') {
+    if (state.mode === 'tutorial') {
+        state.level++;
+        if (state.level > 3) {
+            endGame();
+            return;
+        }
+    } else if (state.mode === 'survival') {
         state.score++;
-        state.time += 2;
+        state.difficulty = Math.max(3, state.difficulty - 1);
+
+        let requiredWinsToGetTime = Math.floor(state.score / 15) + 1;
+        if (state.score % requiredWinsToGetTime === 0) {
+            state.time += 2;
+            showTimeAnimation('+2s');
+        }
     } else if (state.mode === 'progressivo' || state.mode === 'pegadinha') {
         state.level++;
         state.difficulty = Math.max(3, state.difficulty - 2);
@@ -182,8 +243,13 @@ function advanceProgress() {
 
 function endGame() {
     clearInterval(state.timerInterval);
+    const statsElement = document.getElementById('gameover-stats');
 
-    if (state.mode !== 'zen') {
+    if (state.mode === 'tutorial') {
+        statsElement.innerText = "Você está pronto! Escolha um modo de jogo.";
+    } else if (state.mode === 'zen') {
+        statsElement.innerText = `Você acertou ${state.level - 1} vezes antes de errar!`;
+    } else {
         let currentRecord = records[state.mode];
         let newValue = state.mode === 'survival' ? state.score : state.level;
 
@@ -191,15 +257,12 @@ function endGame() {
             records[state.mode] = newValue;
             localStorage.setItem('coloristRecords', JSON.stringify(records));
         }
-    }
 
-    const statsElement = document.getElementById('gameover-stats');
-    if (state.mode === 'survival') {
-        statsElement.innerText = `Pontos: ${state.score}`;
-    } else if (state.mode !== 'zen') {
-        statsElement.innerText = `Nível alcançado: ${state.level}`;
-    } else {
-        statsElement.innerText = `Você acertou ${state.level - 1} vezes antes de errar!`;
+        if (state.mode === 'survival') {
+            statsElement.innerText = `Pontos: ${state.score}`;
+        } else {
+            statsElement.innerText = `Nível alcançado: ${state.level}`;
+        }
     }
 
     switchScreen('gameover');
