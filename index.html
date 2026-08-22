@@ -1,103 +1,25 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <link rel="icon" href="seu-icone.svg" type="image/svg+xml">
-        <title>Colorist</title>
-        <style>
-            body {
-                background-color: black;
-                margin: 0; /* Remove default body margin */
-                overflow: hidden; /* Prevent scrollbars */
-            }
-            .container {
-                display: flex;
-                justify-content: center; /* Center horizontally */
-                align-items: center; /* Center vertically */
-                min-height: 100vh; /* Make the container take up at least the full viewport height */
-                background-color: #111111; /* Optional background color for the page */
-            }
-            .grid {
-                display: grid; /* Use CSS Grid for layout */
-                grid-template-columns: repeat(2, 300px); /* Create two columns with fixed width */
-                grid-template-rows: repeat(2, 300px); /* Create two rows with fixed height */
-                gap: 20px; /* Add gap between grid items */
-                width: 620px; /* Adjust width to accommodate two divs and gap */
-                height: 620px; /* Adjust height to accommodate two divs and gap */
-            }
-            .square-div {
-                width: 100%; /* Make square-div take full width of its grid cell */
-                height: 100%; /* Make square-div take full height of its grid cell */
-                cursor: pointer; /* Indicate that the divs are clickable */
-            }
-        </style>
-        <script>
-            function componentToHex(c) {
-                const hex = c.toString(16);
-                return hex.length === 1 ? '0' + hex : hex;
-            }
-
-            function slightlyModifyHexColor(hexColor) {
-                let shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-                hexColor = hexColor.replace(shorthandRegex, function(m, r, g, b) {return r + r + g + g + b + b;});
-                let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexColor);
-
-                if (!result) return hexColor; // Return original if format is wrong
-
-                let r = parseInt(result[1], 16);
-                let g = parseInt(result[2], 16);
-                let b = parseInt(result[3], 16);
-
-                const modificationFactor = Number(document.getElementById("difficulty").value); // Adjust for more/less drastic changes
-                newR = Math.max(0, Math.min(255, r + modificationFactor));
-                newG = Math.max(0, Math.min(255, g + modificationFactor));
-                newB = Math.max(0, Math.min(255, b + modificationFactor));
-
-                return "#" + componentToHex(newR) + componentToHex(newG) + componentToHex(newB);
-            }
-
-            function generateRandomHexColor() {
-                const letters = '0123456789ABCDEF';
-                let color = '#';
-                for (let i = 0; i < 3; i++) {
-                    color += componentToHex(Math.floor(Math.random() * 256));
-                }
-                return color;
-            }
-            function randomize() {
-                document.getElementById("score").value = Number(document.getElementById("score").value) + 1;
-                const currentDifficulty = Number(document.getElementById("difficulty").value);
-                document.getElementById("difficulty").value = Math.max(1, currentDifficulty - 1); // Ensure difficulty doesn't go below 1
-
-                const grid = document.getElementById('redDivGrid');
-                const divs = Array.from(grid.children); // Get the div elements as an array
-                for (let i = divs.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [divs[i], divs[j]] = [divs[j], divs[i]]; // Swap elements
-                }
-                grid.innerHTML = '';
-                divs.forEach(div => grid.appendChild(div));
-
-                const baseColor = generateRandomHexColor();
-                for (let i = 1; i < 4; i++) {
-                    document.getElementById(i).style.backgroundColor = baseColor;
-                }
-                document.getElementById("4").style.backgroundColor = slightlyModifyHexColor(baseColor);
-            }
-            function wrong(){
-                document.getElementById("difficulty").value = Number(document.getElementById("difficulty").value) + 10;
-            }
-        </script>
-    </head>
-    <body onload="randomize()">
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="seu-icone.svg" type="image/svg+xml">
+    <title>Colorist</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
     <div class="container">
-        <div class="grid" id="redDivGrid">
-            <div id="1" class="square-div" onclick="wrong();"></div>
-            <div id="2" class="square-div" onclick="wrong();"></div>
-            <div id="3" class="square-div" onclick="wrong();"></div>
-            <div id="4" class="square-div" onclick="randomize();"></div>
+        <div class="grid" id="grid">
+            <div class="square-div"></div>
+            <div class="square-div"></div>
+            <div class="square-div"></div>
+            <div class="square-div"></div>
         </div>
     </div>
-    <input style="display: none" type="number" min="1" max="255" value="50" class="slider" id="difficulty" onchange="randomize();">
-    <input style="display: none" type="number" id="score" value="-1">
-    </body>
+
+    <input type="hidden" id="difficulty" value="50">
+    <input type="hidden" id="score" value="-1">
+
+    <script src="js/game.js"></script>
+</body>
 </html>
