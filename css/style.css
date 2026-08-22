@@ -57,8 +57,11 @@ button {
     cursor: pointer;
     border-radius: 8px;
     transition: filter 0.2s, transform 0.1s;
+
+    /* Centraliza o texto e os emojis de todos os botões */
+    position: relative;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
 
@@ -70,15 +73,19 @@ button:hover {
     filter: brightness(1.2);
 }
 
-.btn-tutorial { background-color: #6a1b9a; margin-bottom: 10px; justify-content: center; }
+/* Cores dos botões limpas de regras de layout desnecessárias */
+.btn-tutorial { background-color: #6a1b9a; margin-bottom: 10px; }
 .btn-survival { background-color: #8b0000; }
-.btn-progressivo { background-color: #005f9e; justify-content: center; gap: 10px;}
+.btn-progressivo { background-color: #005f9e; }
 .btn-pegadinha { background-color: #d97700; }
-.btn-easy { background-color: #2d8a39; justify-content: center; gap: 10px;}
-.btn-medium { background-color: #d49000; justify-content: center; gap: 10px;}
-.btn-hard { background-color: #c9302c; justify-content: center; gap: 10px;}
+.btn-easy { background-color: #2d8a39; }
+.btn-medium { background-color: #d49000; }
+.btn-hard { background-color: #c9302c; }
 
 .menu-rec {
+    /* Descola o recorde do fluxo, fixando-o na borda direita do botão */
+    position: absolute;
+    right: 15px;
     font-size: 0.9rem;
     background: rgba(0,0,0,0.3);
     padding: 4px 8px;
