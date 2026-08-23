@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <!-- Cabo do controle -->
+    <path d="M 32 10 C 32 2, 22 6, 22 0" stroke="#777777" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- Conector do cabo -->
+    <rect x="29" y="8" width="6" height="4" rx="1" fill="#333333"/>
+
+    <!-- Base do controle -->
+    <rect x="0" y="10" width="64" height="40" rx="16" fill="#555555"/>
+
+    <!-- D-Pad (Direcional) - Espesso e centralizado -->
+    <rect x="12" y="20" width="8" height="24" rx="2" fill="#eeeeee"/>
+    <rect x="4" y="28" width="24" height="8" rx="2" fill="#eeeeee"/>
+    <circle cx="16" cy="32" r="2.5" fill="#888888"/>
+
+    <!-- Botões de ação (Cores do Genius) - Maiores e simétricos -->
+    <circle cx="36" cy="25" r="6.5" fill="#00ff44"/> <!-- Verde -->
+    <circle cx="52" cy="25" r="6.5" fill="#ff0044"/> <!-- Vermelho -->
+    <circle cx="36" cy="39" r="6.5" fill="#ffff44"/> <!-- Amarelo -->
+    <circle cx="52" cy="39" r="6.5" fill="#0044ff"/> <!-- Azul -->
+</svg>
