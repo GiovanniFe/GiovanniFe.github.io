@@ -1,5 +1,5 @@
 body {
-    background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: white;
     font-family: sans-serif;
     margin: 0;
@@ -8,11 +8,6 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100dvh;
-    transition: background 0.3s ease;
-}
-
-body.in-game {
-    background: #111111;
 }
 
 .screen {
@@ -26,212 +21,46 @@ body.in-game {
     box-sizing: border-box;
 }
 
-.hidden {
-    display: none !important;
-}
-
 h1 {
     font-size: clamp(2.5rem, 10vw, 4rem);
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     letter-spacing: 2px;
-    display: flex;
 }
 
 .menu-buttons {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     width: 100%;
     max-width: 320px;
 }
 
-button {
+.btn-game {
     color: white;
-    border: none;
-    padding: 12px 15px;
-    font-size: 1.05rem;
-    cursor: pointer;
+    text-decoration: none;
+    padding: 15px 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
     border-radius: 8px;
     transition: filter 0.2s, transform 0.1s;
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    gap: 10px;
 }
 
-button:active {
+.btn-game:active {
     transform: scale(0.98);
 }
 
-button:hover {
+.btn-game:hover {
     filter: brightness(1.2);
 }
 
-/* Cores dos botões limpas de regras de layout desnecessárias */
-.btn-tutorial { background-color: #6a1b9a; margin-bottom: 10px; }
-.btn-survival { background-color: #8b0000; }
-.btn-progressivo { background-color: #005f9e; }
-.btn-pegadinha { background-color: #d97700; }
-.btn-easy { background-color: #2d8a39; }
-.btn-medium { background-color: #d49000; }
-.btn-hard { background-color: #c9302c; }
-
-.menu-rec {
-    /* Descola o recorde do fluxo, fixando-o na borda direita do botão */
-    position: absolute;
-    right: 15px;
-    font-size: 0.9rem;
-    background: rgba(0,0,0,0.3);
-    padding: 4px 8px;
-    border-radius: 4px;
+.btn-colorist {
+    background-color: #6a1b9a;
 }
 
-.zen-group {
-    margin-top: 15px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.2);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.zen-group span {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.hud {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
-.timer-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.time-anim {
-    position: absolute;
-    right: -35px;
-    color: #4caf50;
-    font-weight: bold;
-    font-size: 1.1rem;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.time-anim.show {
-    animation: floatUp 0.8s ease-out forwards;
-}
-
-@keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-20px); }
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    width: 90vw;
-    max-width: 500px;
-    aspect-ratio: 1 / 1;
-}
-
-.square-div {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    border-radius: 8px;
-}
-
-#btn-trick {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 500px;
-    background-color: #ff3366;
-    font-weight: bold;
-    justify-content: center;
-}
-
-.btn-quit {
-    margin-top: 30px;
-    background-color: transparent;
-    border: 1px solid rgba(255,255,255,0.4);
-    color: #ccc;
-    font-size: 0.95rem;
-    padding: 10px 20px;
-    justify-content: center;
-}
-
-.btn-quit:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-}
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-}
-
-.modal-box {
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 90%;
-    width: 400px;
-    text-align: center;
-    border: 1px solid #333;
-}
-
-.modal-box h2 {
-    margin-top: 0;
-}
-
-.modal-box p {
-    margin-bottom: 25px;
-    line-height: 1.5;
-}
-
-.btn-modal {
+.btn-genius {
     background-color: #005f9e;
-    width: 100%;
-    margin-top: 15px;
-}
-
-.dont-show-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    font-size: 0.95rem;
-    color: #ccc;
-}
-
-#chk-dont-show {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.dont-show-container label {
-    cursor: pointer;
-}
-
-.time-anim.negative {
-    color: #ff3336;
 }
