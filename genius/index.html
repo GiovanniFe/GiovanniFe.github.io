@@ -13,7 +13,13 @@
             <button class="btn-progressivo" id="btn-classic">
                 🎮 Clássico <span id="menu-rec-classic" class="menu-rec"></span>
             </button>
-            <a href="../" class="btn-quit" style="text-decoration: none; margin-top: 20px; display: flex;">⬅ Voltar ao Hub</a>
+            <button class="btn-dark" id="btn-dark">
+                🎧 In the Dark <span id="menu-rec-dark" class="menu-rec"></span>
+            </button>
+            <button class="btn-oneshade" id="btn-oneshade">
+                ⚪ One Shade of Hue <span id="menu-rec-oneshade" class="menu-rec"></span>
+            </button>
+            <a href="../index.html" class="btn-quit" style="text-decoration: none; margin-top: 20px; display: flex;">⬅ Voltar ao Hub</a>
         </div>
     </div>
 
@@ -41,7 +47,16 @@
         <h2>Jogo Pausado</h2>
         <div class="menu-buttons">
             <button class="btn-progressivo" id="btn-resume">▶ Continuar</button>
-            <button class="btn-quit" onclick="showMenu()" style="margin-top: 20px;">✖ Abandonar Partida</button>
+            <button class="btn-quit" id="btn-quit-pause" style="margin-top: 20px;">✖ Abandonar Partida</button>
+        </div>
+    </div>
+
+    <div id="screen-confirm" class="screen hidden">
+        <h2>Sair da Partida?</h2>
+        <p style="margin-bottom: 20px; text-align: center;">Seu progresso atual será perdido.</p>
+        <div class="menu-buttons">
+            <button class="btn-quit" id="btn-confirm-yes" style="margin-top: 0;">Sim, Abandonar</button>
+            <button class="btn-progressivo" id="btn-confirm-no">Cancelar</button>
         </div>
     </div>
 

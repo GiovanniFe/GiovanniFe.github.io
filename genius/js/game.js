@@ -2,16 +2,25 @@ const screens = {
     menu: document.getElementById('screen-menu'),
     game: document.getElementById('screen-game'),
     pause: document.getElementById('screen-pause'),
+    confirm: document.getElementById('screen-confirm'),
     gameover: document.getElementById('screen-gameover')
 };
 
+const grid = document.getElementById('grid');
 const levelText = document.getElementById('level-text');
 const buttons = Array.from(document.querySelectorAll('.genius-btn'));
 const btnClassic = document.getElementById('btn-classic');
+const btnDark = document.getElementById('btn-dark');
+const btnOneshade = document.getElementById('btn-oneshade');
 const btnQuit = document.getElementById('btn-quit');
+const btnQuitPause = document.getElementById('btn-quit-pause');
 const btnBackMenu = document.getElementById('btn-back-menu');
+const btnConfirmYes = document.getElementById('btn-confirm-yes');
+const btnConfirmNo = document.getElementById('btn-confirm-no');
 const gameoverStats = document.getElementById('gameover-stats');
 const menuRecClassic = document.getElementById('menu-rec-classic');
+const menuRecDark = document.getElementById('menu-rec-dark');
+const menuRecOneshade = document.getElementById('menu-rec-oneshade');
 const btnPause = document.getElementById('btn-pause');
 const btnResume = document.getElementById('btn-resume');
 
@@ -19,6 +28,8 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const frequencies = [329.63, 261.63, 220.00, 164.81];
 
 let state = {
+    mode: 'classic',
+    isDarkActive: false,
     sequence: [],
     playerStep: 0,
     level: 1,
@@ -30,7 +41,9 @@ let state = {
     isPaused: false
 };
 
-let record = localStorage.getItem('geniusRecord') || 0;
+let recordClassic = localStorage.getItem('geniusRecord') || 0;
+let recordDark = localStorage.getItem('geniusRecordDark') || 0;
+let recordOneshade = localStorage.getItem('geniusRecordOneshade') || 0;
 
 function playTone(index) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -52,11 +65,14 @@ function switchScreen(screenName) {
     if (screens[screenName]) {
         screens[screenName].classList.remove('hidden');
     }
-    document.body.classList.toggle('in-game', screenName === 'game' || screenName === 'pause');
+    const isOverlay = screenName === 'game' || screenName === 'pause' || screenName === 'confirm';
+    document.body.classList.toggle('in-game', isOverlay);
 }
 
 function updateMenuRecords() {
-    menuRecClassic.innerText = `🏆 ${record}`;
+    menuRecClassic.innerText = `🏆 ${recordClassic}`;
+    menuRecDark.innerText = `🏆 ${recordDark}`;
+    menuRecOneshade.innerText = `🏆 ${recordOneshade}`;
 }
 
 function showMenu() {
@@ -64,6 +80,7 @@ function showMenu() {
     clearTimeout(state.gameTimeout);
     state.isPaused = false;
     state.resumeCallback = null;
+    grid.className = 'grid';
     updateMenuRecords();
     switchScreen('menu');
 }
@@ -77,20 +94,66 @@ function setGameTimeout(callback, delay) {
     }, delay);
 }
 
-function startGame() {
+function initGameSession(mode) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     clearInterval(state.playbackInterval);
     clearTimeout(state.gameTimeout);
+
+    state.mode = mode;
+    state.isDarkActive = false;
     state.sequence = [];
     state.level = 1;
     state.isPlayerTurn = false;
     state.isPaused = false;
     state.resumeCallback = null;
+
+    grid.className = 'grid';
+    if (mode === 'oneshade') grid.classList.add('oneshade-mode');
+
     switchScreen('game');
-    nextRound();
+    history.pushState({ inGame: true }, '');
+
+    if (mode === 'dark') {
+        playIntro();
+    } else {
+        nextRound();
+    }
+}
+
+function requestQuit() {
+    if (state.mode === 'dark' && !state.isDarkActive) return;
+
+    state.isPaused = true;
+    clearInterval(state.playbackInterval);
+    clearTimeout(state.gameTimeout);
+    switchScreen('confirm');
+}
+
+function cancelQuit() {
+    switchScreen('pause');
+}
+
+function playIntro() {
+    let i = 0;
+    levelText.innerText = `Ouça bem...`;
+
+    state.playbackInterval = setInterval(() => {
+        activateButton(i);
+        i++;
+        if (i >= 4) {
+            clearInterval(state.playbackInterval);
+            setGameTimeout(() => {
+                state.isDarkActive = true;
+                grid.classList.add('dark-mode');
+                setGameTimeout(nextRound, 1000);
+            }, 1000);
+        }
+    }, 800);
 }
 
 function togglePause() {
+    if (state.mode === 'dark' && !state.isDarkActive) return;
+
     state.isPaused = !state.isPaused;
 
     if (state.isPaused) {
@@ -139,6 +202,9 @@ function playSequence() {
 function activateButton(index) {
     const btn = buttons.find(b => parseInt(b.dataset.color) === index);
     playTone(index);
+
+    if (state.mode === 'dark' && state.isDarkActive) return;
+
     btn.classList.add('active');
     setTimeout(() => btn.classList.remove('active'), 400);
 }
@@ -163,17 +229,42 @@ function handleSquareClick(e) {
 }
 
 function endGame() {
-    if (state.level - 1 > record) {
-        record = state.level - 1;
-        localStorage.setItem('geniusRecord', record);
+    if (state.mode === 'classic') {
+        if (state.level - 1 > recordClassic) {
+            recordClassic = state.level - 1;
+            localStorage.setItem('geniusRecord', recordClassic);
+        }
+    } else if (state.mode === 'dark') {
+        if (state.level - 1 > recordDark) {
+            recordDark = state.level - 1;
+            localStorage.setItem('geniusRecordDark', recordDark);
+        }
+    } else if (state.mode === 'oneshade') {
+        if (state.level - 1 > recordOneshade) {
+            recordOneshade = state.level - 1;
+            localStorage.setItem('geniusRecordOneshade', recordOneshade);
+        }
     }
+
     gameoverStats.innerText = `Você alcançou o Nível ${state.level}`;
     switchScreen('gameover');
 }
 
+window.addEventListener('popstate', () => {
+    if (document.body.classList.contains('in-game')) {
+        history.pushState({ inGame: true }, '');
+        requestQuit();
+    }
+});
+
 buttons.forEach(btn => btn.addEventListener('click', handleSquareClick));
-btnClassic.addEventListener('click', startGame);
-btnQuit.addEventListener('click', showMenu);
+btnClassic.addEventListener('click', () => initGameSession('classic'));
+btnDark.addEventListener('click', () => initGameSession('dark'));
+btnOneshade.addEventListener('click', () => initGameSession('oneshade'));
+btnQuit.addEventListener('click', requestQuit);
+btnQuitPause.addEventListener('click', requestQuit);
+btnConfirmYes.addEventListener('click', showMenu);
+btnConfirmNo.addEventListener('click', cancelQuit);
 btnBackMenu.addEventListener('click', showMenu);
 
 if (btnPause) btnPause.addEventListener('click', togglePause);
