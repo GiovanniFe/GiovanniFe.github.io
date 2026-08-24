@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colorist</title>
+    <title>HueSpot</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -45,33 +45,68 @@
         </div>
 
         <div class="grid" id="grid">
-            <div class="square-div"></div>
-            <div class="square-div"></div>
-            <div class="square-div"></div>
-            <div class="square-div"></div>
+            <div class="square-div">
+                <div class="rgb-card hidden">
+                    <div class="rgb-title">Composição da Cor</div>
+                    <div class="rgb-row"><span class="rgb-label">R</span><div class="rgb-bar-bg"><div class="rgb-bar red"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">G</span><div class="rgb-bar-bg"><div class="rgb-bar green"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">B</span><div class="rgb-bar-bg"><div class="rgb-bar blue"></div></div><span class="rgb-val">0</span></div>
+                </div>
+            </div>
+            <div class="square-div">
+                <div class="rgb-card hidden">
+                    <div class="rgb-title">Composição da Cor</div>
+                    <div class="rgb-row"><span class="rgb-label">R</span><div class="rgb-bar-bg"><div class="rgb-bar red"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">G</span><div class="rgb-bar-bg"><div class="rgb-bar green"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">B</span><div class="rgb-bar-bg"><div class="rgb-bar blue"></div></div><span class="rgb-val">0</span></div>
+                </div>
+            </div>
+            <div class="square-div">
+                <div class="rgb-card hidden">
+                    <div class="rgb-title">Composição da Cor</div>
+                    <div class="rgb-row"><span class="rgb-label">R</span><div class="rgb-bar-bg"><div class="rgb-bar red"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">G</span><div class="rgb-bar-bg"><div class="rgb-bar green"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">B</span><div class="rgb-bar-bg"><div class="rgb-bar blue"></div></div><span class="rgb-val">0</span></div>
+                </div>
+            </div>
+            <div class="square-div">
+                <div class="rgb-card hidden">
+                    <div class="rgb-title">Composição da Cor</div>
+                    <div class="rgb-row"><span class="rgb-label">R</span><div class="rgb-bar-bg"><div class="rgb-bar red"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">G</span><div class="rgb-bar-bg"><div class="rgb-bar green"></div></div><span class="rgb-val">0</span></div>
+                    <div class="rgb-row"><span class="rgb-label">B</span><div class="rgb-bar-bg"><div class="rgb-bar blue"></div></div><span class="rgb-val">0</span></div>
+                </div>
+            </div>
         </div>
 
         <button id="btn-trick" class="hidden" onclick="handleTrickButtonClick()">Pegadinha!</button>
-        <button class="btn-quit" onclick="showMenu()">✖ Abandonar Partida</button>
+
+        <div class="game-buttons-group">
+            <button class="btn-restart hidden" id="btn-restart" onclick="restartGame()">🔄 Reiniciar Partida</button>
+            <button class="btn-quit" id="btn-quit-game" onclick="requestQuit()">✖ Abandonar</button>
+        </div>
     </div>
 
-    <div id="screen-gameover" class="screen hidden">
-        <h2>Fim de Jogo</h2>
-        <p id="gameover-stats"></p>
-        <button class="btn-progressivo" onclick="showMenu()">Voltar ao Menu</button>
+    <div id="screen-confirm" class="screen hidden">
+        <h2>Sair da Partida?</h2>
+        <p style="margin-bottom: 20px; text-align: center;">Seu progresso atual será perdido.</p>
+        <div class="menu-buttons">
+            <button class="btn-quit" style="margin-top: 0;" onclick="confirmQuit()">Sim, Abandonar</button>
+            <button class="btn-progressivo" onclick="cancelQuit()">Cancelar</button>
+        </div>
     </div>
 
     <div id="modal-overlay" class="modal-overlay hidden">
-            <div class="modal-box">
-                <h2 id="modal-title">Modo</h2>
-                <p id="modal-text"></p>
-                <div class="dont-show-container">
-                    <input type="checkbox" id="chk-dont-show">
-                    <label for="chk-dont-show">Não mostrar novamente</label>
-                </div>
-                <button class="btn-modal" onclick="closeModalAndInit()">Entendi! Começar</button>
+        <div class="modal-box">
+            <h2 id="modal-title">Modo</h2>
+            <p id="modal-text"></p>
+            <div class="dont-show-container">
+                <input type="checkbox" id="chk-dont-show">
+                <label for="chk-dont-show">Não mostrar novamente</label>
             </div>
+            <button class="btn-modal" onclick="closeModalAndInit()">Entendi! Começar</button>
         </div>
+    </div>
 
     <script src="js/game.js"></script>
 </body>
