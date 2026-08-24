@@ -110,6 +110,11 @@ button:hover {
     cursor: pointer;
     opacity: 0.4;
     transition: opacity 0.1s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    outline: none;
 }
 
 #btn-green { background-color: #00ff00; border-top-left-radius: 100%; }
