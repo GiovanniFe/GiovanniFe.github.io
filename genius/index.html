@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genius</title>
-    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -32,7 +31,18 @@
             <div class="genius-btn" id="btn-blue" data-color="3"></div>
         </div>
 
-        <button class="btn-quit" id="btn-quit">✖ Abandonar Partida</button>
+        <div style="display: flex; gap: 10px; margin-top: 50px;">
+            <button class="btn-quit" id="btn-pause" style="margin-top: 0;">⏸ Pausar</button>
+            <button class="btn-quit" id="btn-quit" style="margin-top: 0;">✖ Abandonar</button>
+        </div>
+    </div>
+
+    <div id="screen-pause" class="screen hidden">
+        <h2>Jogo Pausado</h2>
+        <div class="menu-buttons">
+            <button class="btn-progressivo" id="btn-resume">▶ Continuar</button>
+            <button class="btn-quit" onclick="showMenu()" style="margin-top: 20px;">✖ Abandonar Partida</button>
+        </div>
     </div>
 
     <div id="screen-gameover" class="screen hidden">
