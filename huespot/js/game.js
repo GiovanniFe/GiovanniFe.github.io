@@ -62,7 +62,9 @@ function generateRandomHexColor() {
 }
 
 function slightlyModifyHexColor(hexColor, factor) {
-    const effectiveFactor = Math.max(1, factor);
+    // Math.round arredonda o fator quebrado da nova progressão
+    // Math.max garante o limite biológico mínimo absoluto de 3
+    const effectiveFactor = Math.max(3, Math.round(factor));
 
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
@@ -76,8 +78,10 @@ function slightlyModifyHexColor(hexColor, factor) {
     newG = Math.min(255, Math.max(0, newG));
     newB = Math.min(255, Math.max(0, newB));
 
+    // Proteção extra: se a cor bater nos limites extremos (0 ou 255)
+    // e o canal não mudar, forçamos o limite biológico nela.
     if (newR === r && newG === g && newB === b) {
-        newR = r > 127 ? r - 1 : r + 1;
+        newR = r > 127 ? r - 3 : r + 3;
     }
 
     return "#" + componentToHex(newR) + componentToHex(newG) + componentToHex(newB);
@@ -329,7 +333,9 @@ function advanceProgress() {
         }
     } else if (state.mode === 'survival') {
         state.score++;
-        state.difficulty = Math.max(1, state.difficulty - 1);
+
+        // Reduz 5% por acerto. Leva ~55 acertos para encostar no teto de dificuldade (3)
+        state.difficulty = Math.max(3, state.difficulty * 0.95);
 
         let requiredWinsToGetTime = Math.floor(state.score / 15) + 1;
         if (state.score % requiredWinsToGetTime === 0) {
@@ -338,7 +344,9 @@ function advanceProgress() {
         }
     } else if (state.mode === 'progressivo' || state.mode === 'pegadinha') {
         state.level++;
-        state.difficulty = Math.max(1, state.difficulty - 2);
+
+        // Reduz 8% por acerto. Leva ~35 níveis ininterruptos para chegar no limite biológico
+        state.difficulty = Math.max(3, state.difficulty * 0.92);
     } else if (state.mode === 'zen') {
         state.level++;
     }
