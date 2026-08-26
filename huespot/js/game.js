@@ -41,11 +41,26 @@ let records = JSON.parse(localStorage.getItem('coloristRecords')) || {
 let seenTutorials = JSON.parse(localStorage.getItem('coloristTutorials')) || {};
 
 const instructions = {
-    tutorial: { title: "Tutorial", text: "Encontre o quadrado com a cor ligeiramente diferente dos outros e toque nele. Vamos testar!" },
-    survival: { title: "Survival", text: "Você joga contra o tempo. Acerte para ganhar tempo extra! Conforme sua pontuação sobe, a dificuldade aumenta e você precisará de mais acertos seguidos para ganhar os mesmos segundos." },
-    progressivo: { title: "Progressivo", text: "Começa muito fácil, mas a diferença de cores diminui a cada rodada. Até onde você consegue chegar sem errar?" },
-    pegadinha: { title: "Pegadinha", text: "Cuidado! Às vezes todos os quadrados serão exatamente iguais. Quando isso acontecer, clique no botão 'Pegadinha!' embaixo do quadro para não perder." },
-    zen: { title: "Modo Zen", text: "Sem tempo, sem recordes e a dificuldade não muda. Apenas relaxe e clique nas cores." }
+    tutorial: {
+        title: "Tutorial",
+        text: "O objetivo é simples: encontre e clique no único quadrado que tem uma cor diferente dos demais. Vamos testar!"
+    },
+    survival: {
+        title: "Survival",
+        text: "Corra contra o tempo! A dificuldade sobe a cada acerto. Você ganha bônus de tempo ao avançar, mas perde 3 segundos cada vez que erra. O jogo acaba quando o cronômetro zerar."
+    },
+    progressivo: {
+        title: "Progressivo",
+        text: "Começa fácil, mas as cores ficam cada vez mais idênticas a cada rodada. O jogo acaba no seu primeiro erro. Até onde você consegue chegar?"
+    },
+    pegadinha: {
+        title: "Pegadinha",
+        text: "Cuidado com a armadilha! Se os 4 quadrados aparecerem com exatamente a MESMA cor, não toque neles. Clique no botão 'Pegadinha!' para sobreviver."
+    },
+    zen: {
+        title: "Modo Zen",
+        text: "Sem cronômetro, sem recordes e com dificuldade fixa. Escolha um nível e apenas relaxe clicando nas cores certas."
+    }
 };
 
 function componentToHex(c) {
@@ -62,8 +77,6 @@ function generateRandomHexColor() {
 }
 
 function slightlyModifyHexColor(hexColor, factor) {
-    // Math.round arredonda o fator quebrado da nova progressão
-    // Math.max garante o limite biológico mínimo absoluto de 3
     const effectiveFactor = Math.max(3, Math.round(factor));
 
     const r = parseInt(hexColor.slice(1, 3), 16);
@@ -78,8 +91,6 @@ function slightlyModifyHexColor(hexColor, factor) {
     newG = Math.min(255, Math.max(0, newG));
     newB = Math.min(255, Math.max(0, newB));
 
-    // Proteção extra: se a cor bater nos limites extremos (0 ou 255)
-    // e o canal não mudar, forçamos o limite biológico nela.
     if (newR === r && newG === g && newB === b) {
         newR = r > 127 ? r - 3 : r + 3;
     }
@@ -202,7 +213,7 @@ function initGameParams() {
     });
 
     if (state.mode === 'tutorial') {
-        state.difficulty = 80;
+        state.difficulty = 80; // Dificuldade dinâmica gerida no startRound
         state.time = 0;
     } else if (state.mode === 'survival') {
         state.difficulty = 50;
@@ -225,7 +236,7 @@ function initGameParams() {
         state.timerInterval = setInterval(() => {
             state.time--;
             updateHUD();
-            if (state.time <= 0) endGame();
+            if (state.time <= 0) endGame(false);
         }, 1000);
     }
 
@@ -250,9 +261,21 @@ function showTimeAnimation(text, isNegative = false) {
 }
 
 function updateHUD() {
-    if (state.mode === 'zen' || state.mode === 'tutorial') {
+    if (state.mode === 'tutorial') {
+        const dicas = [
+            "Nível 1: Ache a cor diferente",
+            "Nível 2: A diferença diminuiu...",
+            "Nível 3: Quase iguais!"
+        ];
         hud.left.innerText = '';
-        hud.center.innerText = state.mode === 'tutorial' ? `Fase ${state.level}/3` : 'Zen';
+        hud.center.innerText = dicas[state.level - 1] || "Tutorial";
+        hud.right.innerText = '';
+        return;
+    }
+
+    if (state.mode === 'zen') {
+        hud.left.innerText = '';
+        hud.center.innerText = 'Zen';
         hud.right.innerText = '';
         return;
     }
@@ -269,6 +292,13 @@ function updateHUD() {
 }
 
 function startRound() {
+    // Progressão didática para o tutorial
+    if (state.mode === 'tutorial') {
+        if (state.level === 1) state.difficulty = 80;
+        else if (state.level === 2) state.difficulty = 35;
+        else if (state.level === 3) state.difficulty = 12;
+    }
+
     state.baseColor = generateRandomHexColor();
     state.modifiedColor = slightlyModifyHexColor(state.baseColor, state.difficulty);
     state.correctIndex = Math.floor(Math.random() * squares.length);
@@ -293,7 +323,7 @@ function handleSquareClick(isCorrect) {
     if (state.isGameOver) return;
 
     if (state.mode === 'pegadinha' && state.isTrickRound) {
-        endGame();
+        endGame(false);
         return;
     }
 
@@ -306,10 +336,10 @@ function handleSquareClick(isCorrect) {
             updateHUD();
 
             if (state.time <= 0) {
-                endGame();
+                endGame(false);
             }
         } else {
-            endGame();
+            endGame(false);
         }
     }
 }
@@ -320,7 +350,7 @@ function handleTrickButtonClick() {
     if (state.isTrickRound) {
         advanceProgress();
     } else {
-        endGame();
+        endGame(false);
     }
 }
 
@@ -328,13 +358,11 @@ function advanceProgress() {
     if (state.mode === 'tutorial') {
         state.level++;
         if (state.level > 3) {
-            endGame();
+            endGame(true); // Tutorial concluído com vitória!
             return;
         }
     } else if (state.mode === 'survival') {
         state.score++;
-
-        // Reduz 5% por acerto. Leva ~55 acertos para encostar no teto de dificuldade (3)
         state.difficulty = Math.max(3, state.difficulty * 0.95);
 
         let requiredWinsToGetTime = Math.floor(state.score / 15) + 1;
@@ -344,8 +372,6 @@ function advanceProgress() {
         }
     } else if (state.mode === 'progressivo' || state.mode === 'pegadinha') {
         state.level++;
-
-        // Reduz 8% por acerto. Leva ~35 níveis ininterruptos para chegar no limite biológico
         state.difficulty = Math.max(3, state.difficulty * 0.92);
     } else if (state.mode === 'zen') {
         state.level++;
@@ -373,7 +399,8 @@ function populateRgbCard(cardElement, hexColor) {
     vals[2].innerText = b;
 }
 
-function endGame() {
+// O parâmetro isWin permite finalizar o jogo como uma vitória (apenas o tutorial usa isso por enquanto)
+function endGame(isWin = false) {
     clearInterval(state.timerInterval);
     state.isGameOver = true;
 
@@ -387,24 +414,30 @@ function endGame() {
         }
     }
 
-    if (state.mode === 'pegadinha' && state.isTrickRound) {
-        btnTrick.classList.add('highlight-correct');
-    } else {
-        const base = state.baseColor;
-        const mod = state.modifiedColor;
-        const angles = ['135deg', '225deg', '45deg', '315deg'];
+    // Só mostra o feedback de erro/highlight se a pessoa de fato perdeu
+    if (!isWin) {
+        if (state.mode === 'pegadinha' && state.isTrickRound) {
+            btnTrick.classList.add('highlight-correct');
+        } else {
+            const base = state.baseColor;
+            const mod = state.modifiedColor;
+            const angles = ['135deg', '225deg', '45deg', '315deg'];
 
-        squares[state.correctIndex].style.background = `linear-gradient(${angles[state.correctIndex]}, ${mod} 50%, ${base} 50%)`;
-        squares[state.correctIndex].classList.add('highlight-correct');
+            squares[state.correctIndex].style.background = `linear-gradient(${angles[state.correctIndex]}, ${mod} 50%, ${base} 50%)`;
+            squares[state.correctIndex].classList.add('highlight-correct');
 
-        squares.forEach((sq, idx) => {
-            const card = sq.querySelector('.rgb-card');
-            const colorToDisplay = (idx === state.correctIndex) ? mod : base;
-            populateRgbCard(card, colorToDisplay);
-        });
+            squares.forEach((sq, idx) => {
+                const card = sq.querySelector('.rgb-card');
+                const colorToDisplay = (idx === state.correctIndex) ? mod : base;
+                populateRgbCard(card, colorToDisplay);
+            });
+        }
     }
 
-    if (state.mode === 'tutorial' || state.mode === 'zen') {
+    // Mensagens customizadas no HUD para o final da partida
+    if (state.mode === 'tutorial') {
+        hud.center.innerText = isWin ? "🎉 Você está pronto!" : "❌ Ops, você errou!";
+    } else if (state.mode === 'zen') {
         hud.center.innerText = "Fim!";
     }
 

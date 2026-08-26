@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genius</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Versionamento adicionado para quebrar o cache -->
+    <link rel="stylesheet" href="css/style.css?v=1.0.0">
 </head>
 <body>
     <div id="screen-menu" class="screen">
@@ -66,6 +67,10 @@
         <button class="btn-progressivo" id="btn-back-menu">Voltar ao Menu</button>
     </div>
 
-    <script src="js/game.js"></script>
+    <!-- Etiqueta visual de versão no canto da tela -->
+    <div class="version-label">v. 1.0.0</div>
+
+    <!-- Versionamento adicionado para quebrar o cache -->
+    <script src="js/game.js?v=1.0.0"></script>
 </body>
 </html>

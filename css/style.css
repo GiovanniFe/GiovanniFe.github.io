@@ -68,3 +68,14 @@ h1 {
 * {
     -webkit-tap-highlight-color: transparent;
 }
+
+/* Nova classe para a etiqueta de versão */
+.version-label {
+    position: fixed;
+    bottom: 10px;
+    right: 15px;
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 0.8rem;
+    pointer-events: none;
+    z-index: 1000;
+}
