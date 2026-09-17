@@ -25,7 +25,7 @@ const btnPause = document.getElementById('btn-pause');
 const btnResume = document.getElementById('btn-resume');
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const frequencies = [329.63, 261.63, 220.00, 164.81];
+const frequencies = [440.0, 310.00, 252.00, 209.00]
 
 let state = {
     mode: 'classic',
@@ -49,7 +49,7 @@ function playTone(index) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const oscillator = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    oscillator.type = 'sine';
+    oscillator.type = 'square';
     oscillator.frequency.value = frequencies[index];
     oscillator.connect(gainNode);
     gainNode.connect(audioCtx.destination);

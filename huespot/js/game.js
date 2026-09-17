@@ -17,6 +17,9 @@ const btnRestart = document.getElementById('btn-restart');
 const timeAnim = document.getElementById('time-anim');
 const modalOverlay = document.getElementById('modal-overlay');
 
+// Inicialização do Contexto de Áudio
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
 let state = {
     mode: '',
     score: 0,
@@ -32,13 +35,13 @@ let state = {
     isGameOver: false
 };
 
-let records = JSON.parse(localStorage.getItem('coloristRecords')) || {
+let records = JSON.parse(localStorage.getItem('huespotRecords')) || {
     survival: 0,
     progressivo: 0,
     pegadinha: 0
 };
 
-let seenTutorials = JSON.parse(localStorage.getItem('coloristTutorials')) || {};
+let seenTutorials = JSON.parse(localStorage.getItem('huespotTutorials')) || {};
 
 const instructions = {
     tutorial: {
@@ -62,6 +65,32 @@ const instructions = {
         text: "Sem cronômetro, sem recordes e com dificuldade fixa. Escolha um nível e apenas relaxe clicando nas cores certas."
     }
 };
+
+// Função para gerar os beeps de acerto e erro
+function playTone(type) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    if (type === 'success') {
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 523.25; // Nota C5 (Agudo e suave)
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.2);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.2);
+    } else if (type === 'error') {
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.value = 164.81; // Nota E3 (Grave e texturizado)
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.4);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.4);
+    }
+}
 
 function componentToHex(c) {
     const hex = c.toString(16);
@@ -152,7 +181,10 @@ function cancelQuit() {
         state.timerInterval = setInterval(() => {
             state.time--;
             updateHUD();
-            if (state.time <= 0) endGame();
+            if (state.time <= 0) {
+                playTone('error');
+                endGame(false);
+            }
         }, 1000);
     }
 }
@@ -162,6 +194,8 @@ function confirmQuit() {
 }
 
 function startGame(mode, zenDifficulty = null) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
     state.mode = mode;
     state.zenDifficulty = zenDifficulty;
 
@@ -183,7 +217,7 @@ function closeModalAndInit() {
 
     if (dontShow) {
         seenTutorials[tutKey] = true;
-        localStorage.setItem('coloristTutorials', JSON.stringify(seenTutorials));
+        localStorage.setItem('huespotTutorials', JSON.stringify(seenTutorials));
     }
 
     modalOverlay.classList.add('hidden');
@@ -213,7 +247,7 @@ function initGameParams() {
     });
 
     if (state.mode === 'tutorial') {
-        state.difficulty = 80; // Dificuldade dinâmica gerida no startRound
+        state.difficulty = 80;
         state.time = 0;
     } else if (state.mode === 'survival') {
         state.difficulty = 50;
@@ -236,7 +270,10 @@ function initGameParams() {
         state.timerInterval = setInterval(() => {
             state.time--;
             updateHUD();
-            if (state.time <= 0) endGame(false);
+            if (state.time <= 0) {
+                playTone('error');
+                endGame(false);
+            }
         }, 1000);
     }
 
@@ -292,7 +329,6 @@ function updateHUD() {
 }
 
 function startRound() {
-    // Progressão didática para o tutorial
     if (state.mode === 'tutorial') {
         if (state.level === 1) state.difficulty = 80;
         else if (state.level === 2) state.difficulty = 35;
@@ -323,13 +359,16 @@ function handleSquareClick(isCorrect) {
     if (state.isGameOver) return;
 
     if (state.mode === 'pegadinha' && state.isTrickRound) {
+        playTone('error');
         endGame(false);
         return;
     }
 
     if (isCorrect) {
+        playTone('success');
         advanceProgress();
     } else {
+        playTone('error');
         if (state.mode === 'survival') {
             state.time -= 3;
             showTimeAnimation('-3s', true);
@@ -348,8 +387,10 @@ function handleTrickButtonClick() {
     if (state.isGameOver || state.mode !== 'pegadinha') return;
 
     if (state.isTrickRound) {
+        playTone('success');
         advanceProgress();
     } else {
+        playTone('error');
         endGame(false);
     }
 }
@@ -358,12 +399,12 @@ function advanceProgress() {
     if (state.mode === 'tutorial') {
         state.level++;
         if (state.level > 3) {
-            endGame(true); // Tutorial concluído com vitória!
+            endGame(true);
             return;
         }
     } else if (state.mode === 'survival') {
         state.score++;
-        state.difficulty = Math.max(3, state.difficulty * 0.95);
+        state.difficulty = Math.max(3, state.difficulty * 0.96);
 
         let requiredWinsToGetTime = Math.floor(state.score / 15) + 1;
         if (state.score % requiredWinsToGetTime === 0) {
@@ -372,7 +413,7 @@ function advanceProgress() {
         }
     } else if (state.mode === 'progressivo' || state.mode === 'pegadinha') {
         state.level++;
-        state.difficulty = Math.max(3, state.difficulty * 0.92);
+        state.difficulty = Math.max(3, state.difficulty * 0.96);
     } else if (state.mode === 'zen') {
         state.level++;
     }
@@ -399,7 +440,6 @@ function populateRgbCard(cardElement, hexColor) {
     vals[2].innerText = b;
 }
 
-// O parâmetro isWin permite finalizar o jogo como uma vitória (apenas o tutorial usa isso por enquanto)
 function endGame(isWin = false) {
     clearInterval(state.timerInterval);
     state.isGameOver = true;
@@ -410,11 +450,10 @@ function endGame(isWin = false) {
 
         if (newValue > currentRecord) {
             records[state.mode] = newValue;
-            localStorage.setItem('coloristRecords', JSON.stringify(records));
+            localStorage.setItem('huespotRecords', JSON.stringify(records));
         }
     }
 
-    // Só mostra o feedback de erro/highlight se a pessoa de fato perdeu
     if (!isWin) {
         if (state.mode === 'pegadinha' && state.isTrickRound) {
             btnTrick.classList.add('highlight-correct');
@@ -434,9 +473,9 @@ function endGame(isWin = false) {
         }
     }
 
-    // Mensagens customizadas no HUD para o final da partida
     if (state.mode === 'tutorial') {
         hud.center.innerText = isWin ? "🎉 Você está pronto!" : "❌ Ops, você errou!";
+        if (isWin) playTone('success');
     } else if (state.mode === 'zen') {
         hud.center.innerText = "Fim!";
     }
